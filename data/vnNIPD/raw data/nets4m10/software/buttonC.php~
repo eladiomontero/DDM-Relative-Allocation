@@ -1,0 +1,20 @@
+<!-- The function is used by main_first.php and main_play.php
+Draws the button and after pushing the button forwards the value C to the play.php 
+which further proceeds the action-->
+
+<script type="text/javascript">
+var TimeEnd_js = performance.now();
+document.login.Time.value = TimeEnd_js - TimeStart_js;
+</script>
+
+<form method="post" name="login" action="play.php">
+<input type="hidden" name="move" value="C" />
+<input type="hidden" name="Time" value="">
+<input type="submit" value="" style="background-color:#0099CC; width:140; height:80">
+</form>
+
+
+<!--<script type="text/javascript">
+var ran_number=Math.floor(Math.random()*30);
+setTimeout('document.login.submit();',ran_number*1000);
+</script>-->

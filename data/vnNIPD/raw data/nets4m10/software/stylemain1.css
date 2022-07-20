@@ -1,0 +1,34 @@
+body
+{
+background-image: url("pics/bgimage.gif");
+background-position: top;
+background-repeat: repeat;
+font-family: Verdana,Helvetica; 
+FONT-SIZE: 25px; 
+FONT-WEIGHT: bold;
+}
+
+TABLE          
+{
+FONT-FAMILY: Verdana,Helvetica; 
+FONT-SIZE: 25px; 
+FONT-WEIGHT: bold;
+}
+
+.rotate {
+
+/* Safari */
+-webkit-transform: rotate(-90deg);
+
+/* Firefox */
+-moz-transform: rotate(-90deg);
+
+/* IE */
+-ms-transform: rotate(-90deg);
+
+/* Opera */
+-o-transform: rotate(-90deg);
+
+/* Internet Explorer */
+filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+

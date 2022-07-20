@@ -1,0 +1,48 @@
+<!-- Tutorial page 2 -->
+
+<head>
+<link rel="StyleSheet" href="style.css" type="text/css">
+</head>
+
+<!-- logo -->
+<?php include_once("html_header.php"); ?>
+<br><br><br><br><br><br><br><br>
+
+<b>THE EXPERIMENT </b><br><br>
+
+L'expérience comprend un nombre indéterminé de tours. Elle dure environ une heure.
+
+<b>Les règles sont les mêmes pour tous les participants. </b>
+
+<br><br>
+
+Au début de l'expérience tous les participants sont placés aléatoirement sur un 'treillis' carré. Chaque participant a quatre voisins, un directement au dessus, un dessous, un à gauche et un à droite.
+
+<br><br>Les voisins sont les mêmes durant tous le jeu, signifiant que <b>vous jouerez avec les mêmes participants à chaque round de l'expérience. </b>
+
+<br><br>
+Vous et les autres participants serez anonymes durant la durée de l'expérience. Vos voisins dans le jeu ne seront très probablement pas ceux assis près de vous dans la salle. Ainsi, vous ne saurez jamais contre qui vous jouez, et réciproquement. Votre nom d'utilisateur ne sera pas non plus divulgué. 
+
+<br><br>
+Le montant que vous gagnerez à chaque round dépend à la fois de votre choix et du choix des autres participants. 
+Les gains à chaque round de l'expérience seront additionnés à la fin.
+En plus de cette somme, vous recevrez également 2.5 euros pour votre participation. 
+
+<?php
+// changing the stage of experiment into the next page of tutorial            
+// this way after pressing the button, user will be redirected to index page   
+// and then to the next stage of experiment which is next page of tutorial       
+$_SESSION['step']="tutorial3".$_SESSION['language'].".php";
+?>
+
+
+<form name="form1" method="post" action="index.php">
+Cliquez <input type="submit" value="here" class="btn" name="submit"> pour continuer.
+</form><br />
+
+<!--<script type="text/javascript">
+setTimeout('document.form1.submit()',1000);
+</script>-->
+
+
+<?php include_once("html_footer.php"); ?>

@@ -1,0 +1,6 @@
+#!/bin/bash
+# resetting all the parameter to the values they should have before the experiment is started
+# without erasing the files with data
+    cd exp1/data
+    python cleanfiles.py
+

@@ -1,0 +1,41 @@
+<head>
+<link rel="StyleSheet" href="style.css" type="text/css">
+</head>
+
+<!-- Write the answers of the questionary to the files
+-->
+
+
+<!-- logo -->
+<?php include_once("html_header.php"); ?>
+<br><br><br><br><br><br><br><br>
+
+<?php
+$user=$_SESSION['username'];
+$fh=fopen('data/'.$user.'answers','a+');
+fwrite($fh,"\n- Please describe briefly how did you make the decision what to do:\n".$_POST['strategy']."\n");
+fwrite($fh,"\n- Was your decision influenced by what the other player did in the previous round:\n".$_POST['theother']."\n");
+fwrite($fh,"\n- Was your decision influenced by what you did in the previous round:\n".$_POST['you']."\n");
+fwrite($fh,"\n- Was your decision influenced by what the other player did in the all previous rounds:\n".$_POST['all_rounds']."\n");
+fwrite($fh,"\n- Is this experiment familiar to you?\n".$_POST['heardof']."\n");
+fwrite($fh,"\n- What is the name of this game? What do you know about it?\n".$_POST['namePD']."\n");
+fwrite($fh,"\n- What is you gender?\n".$_POST['gender']."\n");
+fwrite($fh,"\n- What is your University ?\n".$_POST['university']."\n");
+fwrite($fh,"\n- What is the level of your studies? I am currently doing my?\n".$_POST['study']."\n");
+fwrite($fh,"\n- How did you hear about the experiment?\n".$_POST['hear']."\n");
+fwrite($fh,"               other:".$_POST['other_hear']."\n");
+fwrite($fh,"\n- Comments:\n".$_POST['Comments']."\n");
+fclose($fh);
+?>
+
+<?php
+$_SESSION['step']="waitdaemon".$_SESSION['language'].".php";     
+?>
+
+
+<script type="text/javascript">
+top.location="index.php";
+</script>
+
+
+<?php include_once("html_footer.php"); ?>

@@ -1,0 +1,378 @@
+#!/usr/bin/python
+
+# Background program which controls the experiment
+# Players can't log in before it starts
+# Waits for everybody to log in
+# Waits for everybody to read the tutorial
+# Waits for everybody to play, and when they do it calculates the payoffs
+# write them into the appropriate[D[C files
+# and resets the other files for the next round
+# If someone doesn't play after the period "wait_time"
+# it plays for them
+
+import time
+import sys
+import random
+
+
+wait_time = int(sys.argv[1])  # if someone did not play after wait_time (in seconds), 
+                              # daemon plays using move of best player in the last round
+                              # in the neighborhood (including himself)
+                              # in the first round daemon plays random move
+
+
+T=int(sys.argv[2])              # Temptation to defect, default = 10
+R=int(sys.argv[3]) 		# Reward for mutual cooperation, default = 7
+P=int(sys.argv[4])              # Punishment for mutual defection, default = 0
+S=int(sys.argv[5])		# Sucker's payoff, default = 0
+
+point=float(sys.argv[6])        #value of one point
+
+f3=open("pointvalue","w")
+f3.write('%f\n' % (point))   
+f3.close()
+
+flog=open("log","a")
+      
+print "parameters "+str(wait_time)+" R="+str(R)+" S="+str(S)+" T="+str(T)+" P="+str(P)+"\n"
+
+f3=open("temptation","w")
+f3.write('%d\n' % (T))
+f3.close()
+
+f3=open("reward","w")
+f3.write('%d\n' % (R))
+f3.close()
+
+f3=open("punishment","w")
+f3.write('%d\n' % (P))
+f3.close()
+
+f3=open("suckers","w")
+f3.write('%d\n' % (S))
+f3.close()
+
+
+def readusers(filename): # function which read users' names from the file and puts them in array
+  fh=open(filename);
+  tmp1=fh.readlines();
+  fh.close();
+  tmp=[];
+  for i in tmp1:
+    tmp.append(i.replace('\n',''))
+  return tmp;
+                
+users=readusers('userlist');     		# reading users' names into array
+
+f3=open("numberofusers","r")
+numberofusers=int(f3.read())
+f3.close()
+
+f3=open("deamonstarted","w")
+f3.write("started")
+f3.close()
+
+f3=open("experimentstarted","w")
+f3.write("started")
+f3.close()
+
+f3=open("history.dat","w")         # the file with the game            
+f3.write("round player action_player opponent action_opponent payoff time_php time_js who_played\n")
+f3.close()
+f3=open("proba.dat","w")         # the file with the game            
+f3.write("round user time_start time_end time_php time_js\n")
+f3.close()
+
+
+
+while True:					# Waits until all the players log in
+  time.sleep(1)                                 
+  flog.write("loggedin")
+  fh=open("allloggedin","r")
+  if_allloggedin = fh.read()
+  fh.close()
+ #  print if_started+"\n"
+  if (if_allloggedin =="allloggedin"):
+    break                     
+  else:
+    counterloggedin=0               
+    for i in users:              
+      fh=open(i+"loggedin","r")     
+      if_ready = fh.read()       
+      if_ready = if_ready.replace('\n','')
+      fh.close()
+      if (if_ready == "yes"): 
+        counterloggedin = counterloggedin + 1
+    if (counterloggedin >= numberofusers):
+      fh=open("allloggedin","w")
+      fh.write("allloggedin")
+      fh.close()
+
+flog.write("\n")
+                                                # Wait until all the players read the tutorial                                          
+while True:
+  time.sleep(1)      
+  flog.write("started")          
+  fh=open("started","r")
+  if_started = fh.read()
+  fh.close()
+  if (if_started =="started"):
+    time_last_move = time.time();
+    break                             
+  else:
+    counterready=0
+    for i in users:
+      fh=open(i+"ready","r")
+      if_ready = fh.read()
+      if_ready = if_ready.replace('\n','')
+      fh.close()
+      if (if_ready == "ready"): 
+        counterready = counterready + 1
+    if (counterready >= numberofusers):
+      fh=open("started","w")
+      fh.write("started")
+      fh.close()
+              
+                   
+    
+
+t0= time.time() # take time at begining
+print "Start"
+
+
+f1=open("round","r+")                      	# opening all the necessary files for reading
+round=int(f1.read())
+f1.close()
+f2=open("roundsnumber","r")
+roundsnumber=int(f2.read())
+f2.close()
+f3=open("numberofusers","r")
+numberofusers=int(f3.read())
+f3.close()
+
+
+
+while (round <= roundsnumber):
+  while True:
+    f2=open("roundsnumber","r")            	#reads total number of rounds, if reads empty string reads again
+    rn=int(f2.read())
+    if(rn!=""):
+      roundsnumber=int(rn)
+      break
+    f2.close()  
+
+  played = 0
+  for i in users:                          	# counts how many players played
+     fh=open(i+"lock","r")
+     lock = fh.read()
+     lock = lock.replace('\n','')
+     fh.close()
+     if (lock!="notplayed"):               	# checking if user played
+       played = played + 1                 	# increase the number of played users by one
+#       print "played "+lock+" "+str(played)+" numberofusers "+str(numberofusers)+" round "+str(round)+" user "+i
+     else:
+#       flog.write(i+ "didn") 
+       break 					# going out of for loop when we find one user which didn't play 
+
+
+  if (played == numberofusers):                 # if everybody played it proceeds to calculate payoffs
+    print "all played round"+str(round)+"\n"    # otherwise it goes to the end and waits 1 sec
+    if (round == 1):
+      fh=open("firstround","w")                 # change the first time it goes there, so that program know it is not first round
+      fh.write("notfirst")
+      fh.close() 
+
+    for i in users:                             # reads players action from lock files for all users and write into the moves files
+      fh=open(i+"lock","r")			# this is done because lock files needs to be clean so players would be allowed to play again
+      lock = fh.read()   			# but information about the actions is needed so it could be presented to the players in the next round	
+      lock = lock.replace('\n','')		# therefore this information is kept in moves files
+      fh.close()
+      
+      fh=open(i+"move","w")                     
+      fh.write(lock)
+      fh.close()
+      
+    totalround=0
+    for i in users: 				# reading the actions of neighbors and calculating the payoffs for all players
+      usern=readusers(i); 
+      nb_C = 0
+      nb_D = 0              
+      for j in usern:
+          fh=open(j+"move","r")
+          move_n = fh.read()
+          move_n = move_n.replace('\n','')
+          fh.close()
+          if (move_n == "C"):              
+            nb_C = nb_C + 1
+          elif (move_n == "D"):
+            nb_D = nb_D + 1
+          else:  
+            print "error in round "+str(round)+ " user "+i+ " neighbour "+j+"\n"
+      fh=open(i+"move","r")
+      move_u = fh.read()
+      move_u = move_u.replace('\n','')
+      fh.close()
+      if (move_u == "C"):
+        score = nb_C * R + nb_D * S
+#        flog.write("round "+str(round)+ " user "+i+ " move "+move_u+" nb_C "+str(nb_C)+" nb_D "+str(nb_D)+" score "+str(score)+"\n") 
+      elif (move_u == "D"):
+        score = nb_C * T + nb_D * P
+#        flog.write("round "+str(round)+ " user "+i+ " move "+move_u+" nb_C "+str(nb_C)+" nb_D "+str(nb_D)+" score "+str(score)+"\n")
+      else:  
+        print "error in round "+str(round)+ " user "+i+ "\n"
+      
+      fh=open(i+"score","w")			# writing payoffs from the previous round in the score files
+      fh.write(str(score))
+      fh.close()
+      
+      fh1 = open(i+"timestart","r")		# calculating the time players needed to make the action
+      fh2 = open(i+"timeend","r")       
+      time_start = float(fh1.read())
+      time_end = float(fh2.read()) 
+      fh1.close()
+      fh2.close()                
+      time_of_move_php = (time_end - time_start)*1000
+      
+      fh1 = open(i+"time","r")             # calculating the time players needed to make the action
+      time_of_move_js= fh1.read().replace("\n","")
+      fh1.close()
+      
+      fh=open("proba.dat","a")                  # writing all the data into the history file
+      fh.write(str(round)+" "+str(i)+" "+str(time_start)+" "+str(time_end)+" "+str(time_of_move_php)+" "+str(time_of_move_js)+"\n");
+      fh.close()
+                                                        
+
+      fh=open(i+"totalscore","r")		# calculating total payoff until that round and writing it in totalscore files
+      totalscore = int(fh.read())
+      fh.close()
+      
+      fh=open(i+"totalscore","w") 
+      totalscore = totalscore + int(score)
+      fh.write(str(totalscore))
+      fh.close()
+#      if rn==roundnumber:
+        
+        
+      totalround = totalround + int(score)      # calculating cumulative payoffs in this round for all players
+      
+      fh=open(i+"playedby","r")			# writes if the action was made by player, computer or this script
+      playedby = fh.read()
+      fh.close()
+                                      
+      fh=open(i+"history","a")			# writing all the data into the history file
+      fh.write(str(round)+" "+move_u+" "+str(score)+" "+str(time_of_move_php)+" "+str(time_of_move_js)+" "+playedby+"\n");
+      fh.close()
+      
+      fh=open("history.dat","a")                  # writing all the data into the history file
+      fh.write(str(round)+" "+str(i)+" "+str(move_u)+" "+str(usern)+" "+str(move_n)+" "+str(score)+" "+str(time_of_move_php)+" "+str(time_of_move_js)+" "+playedby+"\n");
+      fh.close()
+      
+      fh=open(i+"lock","r")			# reads lock again to make sure it didn't changed
+      lock = fh.read()
+      lock = lock.replace('\n','')
+      fh.close()
+                        
+      print "after  "+str(round)+" "+i+" "+lock+" "+move_u+"\n" 
+    
+    # end of for loop
+    
+    for i in users:				# resets lock files to notplayed, so players can play again 
+      fh=open(i+"lock","w")
+      fh.write("notplayed")
+      fh.close()
+                                  
+    fh=open("totaltotal","r")
+    totaltotal = int(fh.read())
+    fh.close()
+                          
+    fh=open("totaltotal","w")			# calculates and writes total payoff for all players until this round
+    totaltotal = totaltotal + totalround
+    fh.write(str(totaltotal))
+    fh.close()
+                                                                                      
+    round = round + 1				# increments the round and writes it to the file so PHP can read it from there
+    fh=open("round","w")
+    fh.write(str(round))
+    fh.close()
+    time_last_move = time.time()              
+                           
+                          
+  else: 					# if all the player still did not play we check if more time than wait time is passed
+    new_time = time.time()			# if it is than we play the action for all the players which still haven't play
+    try_time =(new_time - time_last_move) 
+    print str(int(try_time))+"\n"
+    if (int(try_time)>int(wait_time)):
+      fh=open("started","r")
+      if_started = fh.read()
+      fh.close()
+      print if_started+" time "+str(try_time)+"daemon \n"
+      if (if_started =="started"):  
+#        time_last_move = time.time();             
+        print "vece\n"
+        for i in users:
+          fh=open(i+"lock","r")
+          lock = fh.read()
+          lock = lock.replace('\n','')
+          fh.close()
+          if (lock=="notplayed"):
+            print "notplayed found\n"      	# in the first round the actions is random with 50% chance for each possible action   
+            if (int(round) == 1):
+              print "first round played by daemon\n"
+              move_rand = random.choice(["C","D"])
+              print move_rand+"\n"
+              fh=open(i+"lock","w")
+              fh.write(move_rand)
+              fh.close()
+         
+            else:  				# in the rounds after the first one we make the same action as in the previous round with 80% chance and opposite one with 20% chance
+              print "played by daemon\n"
+              fh=open(i+"move","r")
+              move = fh.read().replace('\n','')
+              fh.close()    
+              if (move=="C"):
+                opmove="D";
+              else:
+                opmove="C";
+              rand_move=random.randint(0, 4)
+              if(rand_move==0):
+                move=opmove                        
+              fh=open(i+"lock","w") 
+              fh.write(move)       
+              fh.close()
+              
+            fh=open(i+"playedby","w")		# write to the file that the action is made by this script
+            fh.write("daemon")    
+            fh.close()
+                 
+            fh=open(i+"timeend","w")		# writes the time of the playing		
+            fh.write(str(new_time))  
+            fh.close()
+              
+            fh=open(i+"timestart","w") 		# resets the time of the start of the next move
+            fh.write(str(time_last_move))                 
+            fh.close()  
+                                           
+                                                                                                    
+    time.sleep(1)       			# if the time for the action is still not up and there are still players which didn't play, sleeps for 1 secs and then checks again
+      
+flog.close()
+
+fhe=open("earnings","w")
+
+fh=open("N","r") 		# resets the time of the start of the next move
+N=int(fh.read())             
+fh.close()  
+
+for i in range(1,N+1):
+    fh=open("usuario"+str(i)+"totalscore","r") 		# resets the time of the start of the next move
+    tmp=float(fh.read())             
+    fh.close()  
+    payoff=tmp*point+2.5
+    fhe.write("usuario"+str(i)+" "+str(payoff)+"\n")
+fhe.close()  
+
+fh=open("finished","w")
+fh.write("finished")
+fh.close()
+                         
+print time.time()-t0

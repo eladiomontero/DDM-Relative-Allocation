@@ -1,0 +1,29 @@
+body
+{
+background-image: url("back_verlauf.jpg");
+background-position: top;
+background-repeat: repeat-x;
+font-family: Verdana, Georgia;
+font-size: 16px;
+text-align: left;
+margin: 0px 150px;
+}
+
+input.marg
+{
+margin: 100px;
+}
+
+input.btn 
+{ 
+color:#FF0000;
+font: bold 84% 'trebuchet ms', ariel; 
+}
+
+
+input.blue
+{
+background-color:
+}
+
+ 

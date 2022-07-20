@@ -1,0 +1,39 @@
+<!-- Tutorial page 1 -->
+
+
+<head>
+<link rel="StyleSheet" href="style.css" type="text/css">
+</head>
+
+<!-- logo -->
+<?php include_once("html_header.php"); ?>
+<br><br><br><br><br><br><br><br>
+ 
+Dit experiment bestudeert hoe mensen beslissingen maken.<br><br>
+
+We verwachten niet dat je een bepaald gedrag vertoont.<br><br>
+
+Er wordt in dit experiment niet gelogen.<br><br>
+
+Je bent volledig anoniem tijdens het experiment en je keuzes zijn alleen geassocieerd met je gebruikersnaam, die jij alleen kent. <br><br>
+
+De keuzes die je maakt in het experiment bepalen rechtstreeks het bedrag dat je verdient.<br><br>
+
+
+<?php
+// changing the stage of experiment into the next page of tutorial            
+// this way after pressing the button, user will be redirected to index page
+// and then to the next stage of experiment which is next page of tutorial                                                                       
+$_SESSION['step']="tutorial2".$_SESSION['language'].".php"; 
+?>
+
+<form name="form1" method="post" action="index.php">
+Klik <input type="submit" value="hier" class="btn" name="submit"> om verder te gaan.
+</form><br />
+
+<!--<script type="text/javascript">
+setTimeout('document.form1.submit()',1000);
+</script>-->
+
+
+<?php include_once("html_footer.php"); ?>
